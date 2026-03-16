@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Transactions – Investment Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0"><i class="bi bi-list-ul me-2"></i>Transactions</h4>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('add_transaction') }}">
+    <i class="bi bi-plus-circle me-1"></i>Add Transaction
+  </a>
+</div>
+
+<!-- Filters -->
+<form class="row g-2 mb-3" method="get">
+  <div class="col-6 col-md-2">
+    <input type="text" class="form-control form-control-sm" name="ticker"
+           placeholder="Ticker" value="{{ filters.ticker or '' }}">
+  </div>
+  <div class="col-6 col-md-2">
+    <select class="form-select form-select-sm" name="type">
+      <option value="">All types</option>
+      {% for t in tx_types %}
+        <option value="{{ t }}" {{ 'selected' if filters.transaction_type == t }}>{{ t }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-6 col-md-2">
+    <select class="form-select form-select-sm" name="asset_type">
+      <option value="">All assets</option>
+      {% for a in asset_types %}
+        <option value="{{ a }}" {{ 'selected' if filters.asset_type == a }}>{{ a }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-6 col-md-2">
+    <input type="date" class="form-control form-control-sm" name="date_from"
+           value="{{ filters.date_from or '' }}" placeholder="From">
+  </div>
+  <div class="col-6 col-md-2">
+    <input type="date" class="form-control form-control-sm" name="date_to"
+           value="{{ filters.date_to or '' }}" placeholder="To">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('transactions') }}">Clear</a>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Date</th>
+          <th>Ticker</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Asset</th>
+          <th class="text-end">Qty</th>
+          <th class="text-end">Price</th>
+          <th class="text-end">Total</th>
+          <th>Currency</th>
+          <th>Notes</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in transactions %}
+        <tr>
+          <td>{{ tx.date }}</td>
+          <td class="fw-semibold">{{ tx.ticker }}</td>
+          <td class="text-muted small">{{ tx.name }}</td>
+          <td>
+            <span class="badge
+              {% if tx.transaction_type == 'BUY' %}bg-primary
+              {% elif tx.transaction_type == 'SELL' %}bg-danger
+              {% else %}bg-success{% endif %}">
+              {{ tx.transaction_type }}
+            </span>
+          </td>
+          <td><span class="badge bg-secondary">{{ tx.asset_type }}</span></td>
+          <td class="text-end">{{ "%.4f"|format(tx.quantity) }}</td>
+          <td class="text-end">{{ "%.4f"|format(tx.price_per_unit) }}</td>
+          <td class="text-end fw-semibold">{{ "%.2f"|format(tx.quantity * tx.price_per_unit) }}</td>
+          <td>{{ tx.currency }}</td>
+          <td class="text-muted small">{{ tx.notes }}</td>
+          <td>
+            <a href="{{ url_for('edit_transaction', tx_id=tx.id) }}" class="btn btn-sm btn-outline-secondary me-1" title="Edit">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <form method="post" action="{{ url_for('delete_transaction', tx_id=tx.id) }}"
+                  style="display:inline"
+                  onsubmit="return confirm('Delete this transaction?')">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="11" class="text-center text-muted py-4">No transactions found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

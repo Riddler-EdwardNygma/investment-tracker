@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Dividends – Investment Tracker{% endblock %}
+
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-cash-coin me-2"></i>Dividend Income</h4>
+
+{% if by_year %}
+  <!-- Annual totals -->
+  <div class="row g-3 mb-4">
+    {% for year, data in by_year.items()|sort(reverse=True) %}
+    <div class="col-6 col-md-3">
+      <div class="card">
+        <div class="card-body">
+          <div class="text-muted small">{{ year }}</div>
+          <div class="fs-5 fw-bold text-success">{{ "%.2f"|format(data.total) }}</div>
+          <div class="text-muted small">{{ data.rows|length }} payment{{ 's' if data.rows|length != 1 }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Full table -->
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Date</th>
+            <th>Ticker</th>
+            <th>Name</th>
+            <th class="text-end">Quantity / Shares</th>
+            <th class="text-end">Amount per Share</th>
+            <th class="text-end">Total</th>
+            <th>Currency</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in all_rows %}
+          <tr>
+            <td>{{ row.date }}</td>
+            <td class="fw-semibold">{{ row.ticker }}</td>
+            <td class="text-muted small">{{ row.name }}</td>
+            <td class="text-end">{{ "%.4f"|format(row.quantity) }}</td>
+            <td class="text-end">{{ "%.4f"|format(row.price_per_unit) }}</td>
+            <td class="text-end fw-semibold text-success">
+              {{ "%.2f"|format(row.quantity * row.price_per_unit) }}
+            </td>
+            <td>{{ row.currency }}</td>
+            <td class="text-muted small">{{ row.notes }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% else %}
+  <div class="text-center text-muted py-5">
+    <i class="bi bi-cash-coin fs-1 d-block mb-2"></i>
+    No dividends recorded yet. <a href="{{ url_for('add_transaction') }}">Add a DIVIDEND transaction</a>.
+  </div>
+{% endif %}
+{% endblock %}
