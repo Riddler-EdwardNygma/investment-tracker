@@ -7,11 +7,12 @@ from dateutil.relativedelta import relativedelta
 TAX_FREE_YEARS = 3
 
 
-def get_tax_status(buy_date):
+def get_tax_status(buy_date, hold_years=None):
     """Calculate Czech time-test status for a given buy date.
 
     Args:
         buy_date: date or ISO string (YYYY-MM-DD)
+        hold_years: required holding period in years (default: TAX_FREE_YEARS=3)
 
     Returns dict with:
         days_held       – days since purchase
@@ -20,12 +21,17 @@ def get_tax_status(buy_date):
         is_tax_free     – bool
         badge_class     – Bootstrap badge color class
         badge_label     – human-readable status label
+        hold_years      – the hold period used
     """
+    if hold_years is None:
+        hold_years = TAX_FREE_YEARS
+    hold_years = int(hold_years)
+
     if isinstance(buy_date, str):
         buy_date = datetime.strptime(buy_date, "%Y-%m-%d").date()
 
     today = date.today()
-    tax_free_date = buy_date + relativedelta(years=TAX_FREE_YEARS)
+    tax_free_date = buy_date + relativedelta(years=hold_years)
 
     days_held = (today - buy_date).days
     is_tax_free = today >= tax_free_date
@@ -48,12 +54,13 @@ def get_tax_status(buy_date):
         "is_tax_free": is_tax_free,
         "badge_class": badge_class,
         "badge_label": badge_label,
+        "hold_years": hold_years,
     }
 
 
 def enrich_lots_with_tax(lots):
     """Add tax status fields to a list of open lot dicts."""
     for lot in lots:
-        status = get_tax_status(lot["date"])
+        status = get_tax_status(lot["date"], hold_years=lot.get("hold_years", TAX_FREE_YEARS))
         lot.update(status)
     return lots
