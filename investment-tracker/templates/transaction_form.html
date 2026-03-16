@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if tx else 'Add' }} Transaction – Investment Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card">
+      <div class="card-header fw-semibold">
+        <i class="bi bi-{{ 'pencil' if tx else 'plus-circle' }} me-1"></i>
+        {{ 'Edit' if tx else 'Add' }} Transaction
+      </div>
+      <div class="card-body">
+        <form method="post" action="{{ action }}">
+
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label">Ticker <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="ticker" required
+                     placeholder="e.g. VWCE.DE" value="{{ tx.ticker if tx else '' }}"
+                     style="text-transform:uppercase">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-control" name="name"
+                     placeholder="e.g. Vanguard FTSE All-World" value="{{ tx.name if tx else '' }}">
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Asset Type <span class="text-danger">*</span></label>
+              <select class="form-select" name="asset_type" required>
+                {% for a in asset_types %}
+                  <option value="{{ a }}" {{ 'selected' if tx and tx.asset_type == a }}>{{ a }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Transaction Type <span class="text-danger">*</span></label>
+              <select class="form-select" name="transaction_type" required>
+                {% for t in tx_types %}
+                  <option value="{{ t }}" {{ 'selected' if tx and tx.transaction_type == t }}>{{ t }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Quantity <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" name="quantity" required
+                     step="any" min="0.0001" value="{{ tx.quantity if tx else '' }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Price per Unit <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" name="price_per_unit" required
+                     step="any" min="0" value="{{ tx.price_per_unit if tx else '' }}">
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Currency <span class="text-danger">*</span></label>
+              <select class="form-select" name="currency" required>
+                {% for c in currencies %}
+                  <option value="{{ c }}" {{ 'selected' if tx and tx.currency == c }}>{{ c }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" name="date" required
+                     value="{{ tx.date if tx else today }}">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Notes</label>
+              <input type="text" class="form-control" name="notes"
+                     value="{{ tx.notes if tx else '' }}">
+            </div>
+          </div>
+
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>{{ 'Save Changes' if tx else 'Add Transaction' }}
+            </button>
+            <a href="{{ url_for('transactions') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
