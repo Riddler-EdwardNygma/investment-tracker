@@ -1,6 +1,22 @@
 import json
+import os
+import shutil
+import tempfile
 from datetime import date
 from io import BytesIO
+
+# Fix: curl_cffi (used by yfinance) fails when the certifi CA bundle path
+# contains non-ASCII characters (e.g. Windows username "Uživatel").
+# Copy cacert.pem to the system temp directory (uses 8.3 short path = ASCII-safe).
+try:
+    import certifi as _certifi
+    _dst = os.path.join(tempfile.gettempdir(), "cacert.pem")
+    if not os.path.exists(_dst):
+        shutil.copy2(_certifi.where(), _dst)
+    os.environ.setdefault("CURL_CA_BUNDLE", _dst)
+    os.environ.setdefault("REQUESTS_CA_BUNDLE", _dst)
+except Exception:
+    pass
 
 from flask import (Flask, render_template, request, redirect,
                    url_for, flash, jsonify, session, send_file, g)
