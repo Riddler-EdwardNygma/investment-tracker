@@ -32,6 +32,35 @@ from xtb_import import parse_xtb_csv
 app = Flask(__name__)
 app.secret_key = "dev-secret-change-in-production"
 
+
+# ── Czech number format filters ───────────────────────────────────────────────
+
+@app.template_filter("czf")
+def czech_format(value, decimals=2):
+    """Format a number in Czech style: space thousands separator, comma decimal.
+    Usage in templates:  {{ value|czf }}  or  {{ value|czf(4) }}
+    """
+    if value is None:
+        return "–"
+    try:
+        formatted = f"{float(value):,.{decimals}f}"
+        # Python uses comma for thousands and dot for decimal → swap to Czech style
+        return formatted.replace(",", "\u00a0").replace(".", ",")
+    except (TypeError, ValueError):
+        return str(value)
+
+
+@app.template_filter("czfs")
+def czech_format_signed(value, decimals=2):
+    """Like czf but always prefixes + or – (for P&L values)."""
+    if value is None:
+        return "–"
+    try:
+        formatted = f"{float(value):+,.{decimals}f}"
+        return formatted.replace(",", "\u00a0").replace(".", ",")
+    except (TypeError, ValueError):
+        return str(value)
+
 ASSET_TYPES = ["ETF", "Share", "Bond", "Other"]
 CURRENCIES = ["CZK", "EUR", "USD", "GBP", "CHF"]
 TX_TYPES = ["BUY", "SELL", "DIVIDEND"]

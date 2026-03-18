@@ -24,7 +24,7 @@
     <div class="card h-100">
       <div class="card-body">
         <div class="text-muted small">Total Invested</div>
-        <div class="fs-5 fw-bold">{{ "%.2f"|format(total_invested) }} {{ currency_symbol }}</div>
+        <div class="fs-5 fw-bold">{{ total_invested|czf }} {{ currency_symbol }}</div>
       </div>
     </div>
   </div>
@@ -33,7 +33,7 @@
       <div class="card-body">
         <div class="text-muted small">Current Value</div>
         <div class="fs-5 fw-bold">
-          {% if total_current %}{{ "%.2f"|format(total_current) }} {{ currency_symbol }}{% else %}<span class="text-muted">–</span>{% endif %}
+          {% if total_current %}{{ total_current|czf }} {{ currency_symbol }}{% else %}<span class="text-muted">–</span>{% endif %}
         </div>
       </div>
     </div>
@@ -44,7 +44,7 @@
         <div class="text-muted small">Unrealized P&amp;L</div>
         {% if total_unrealized is not none %}
           <div class="fs-5 fw-bold {{ 'text-success' if total_unrealized >= 0 else 'text-danger' }}">
-            {{ "%+.2f"|format(total_unrealized) }} {{ currency_symbol }}
+            {{ total_unrealized|czfs }} {{ currency_symbol }}
           </div>
         {% else %}
           <div class="fs-5 fw-bold text-muted">–</div>
@@ -56,7 +56,7 @@
     <div class="card h-100">
       <div class="card-body">
         <div class="text-muted small">Dividends Received</div>
-        <div class="fs-5 fw-bold text-info">{{ "%.2f"|format(total_dividends) }} {{ currency_symbol }}</div>
+        <div class="fs-5 fw-bold text-info">{{ total_dividends|czf }} {{ currency_symbol }}</div>
       </div>
     </div>
   </div>
@@ -90,19 +90,19 @@
                 {% if h.sector %}<br><small class="text-muted fst-italic">{{ h.sector }}</small>{% endif %}
               </td>
               <td><span class="badge bg-secondary">{{ h.asset_type }}</span></td>
-              <td class="text-end">{{ "%.4f"|format(h.quantity) }}</td>
-              <td class="text-end">{{ "%.4f"|format(h.avg_cost) }} {{ h.currency }}</td>
+              <td class="text-end">{{ h.quantity|czf(1) }}</td>
+              <td class="text-end">{{ h.avg_cost|czf(4) }} {{ h.currency }}</td>
               <td class="text-end">
-                {% if h.current_price %}{{ "%.4f"|format(h.current_price) }}{% else %}<span class="text-muted">–</span>{% endif %}
+                {% if h.current_price %}{{ h.current_price|czf(4) }}{% else %}<span class="text-muted">–</span>{% endif %}
               </td>
               <td class="text-end">
-                {% if h.current_value is not none %}{{ "%.2f"|format(h.current_value) }} {{ currency_symbol }}{% else %}<span class="text-muted">–</span>{% endif %}
+                {% if h.current_value is not none %}{{ h.current_value|czf }} {{ currency_symbol }}{% else %}<span class="text-muted">–</span>{% endif %}
               </td>
               <td class="text-end">
                 {% if h.unrealized_pnl is not none %}
                   <span class="{{ 'text-success' if h.unrealized_pnl >= 0 else 'text-danger' }}">
-                    {{ "%+.2f"|format(h.unrealized_pnl) }} {{ currency_symbol }}<br>
-                    <small>({{ "%+.1f"|format(h.pnl_pct) }}%)</small>
+                    {{ h.unrealized_pnl|czfs }} {{ currency_symbol }}<br>
+                    <small>({{ h.pnl_pct|czfs(1) }}%)</small>
                   </span>
                 {% else %}
                   <span class="text-muted">–</span>

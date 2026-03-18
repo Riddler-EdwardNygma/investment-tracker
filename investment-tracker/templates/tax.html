@@ -64,8 +64,8 @@
           </td>
           <td><span class="badge bg-secondary">{{ lot.asset_type }}</span></td>
           <td>{{ lot.date }}</td>
-          <td class="text-end">{{ "%.4f"|format(lot.quantity) }}</td>
-          <td class="text-end">{{ "%.2f"|format(lot.cost_basis) }} {{ lot.currency }}</td>
+          <td class="text-end">{{ lot.quantity|czf(1) }}</td>
+          <td class="text-end">{{ lot.cost_basis|czf }} {{ lot.currency }}</td>
           <td class="text-end">{{ lot.days_held }}</td>
           <td>
             {{ lot.tax_free_date.strftime('%Y-%m-%d') }}
@@ -106,7 +106,7 @@
         <span class="badge bg-{{ lot.badge_class }} fs-6">{{ lot.days_remaining }}d</span>
       </div>
       <div class="flex-grow-1">
-        <strong>{{ lot.ticker }}</strong> – {{ "%.4f"|format(lot.quantity) }} units
+        <strong>{{ lot.ticker }}</strong> – {{ lot.quantity|czf(1) }} units
         <div class="text-muted small">Bought {{ lot.date }} · Tax-free {{ lot.tax_free_date.strftime('%d %b %Y') }}</div>
         <div class="progress mt-1" style="height:6px">
           {% set total_days = lot.hold_years * 365 %}

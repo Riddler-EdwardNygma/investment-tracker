@@ -85,9 +85,9 @@
             </span>
           </td>
           <td><span class="badge bg-secondary">{{ tx.asset_type }}</span></td>
-          <td class="text-end">{{ "%.4f"|format(tx.quantity) }}</td>
-          <td class="text-end">{{ "%.4f"|format(tx.price_per_unit) }}</td>
-          <td class="text-end fw-semibold">{{ "%.2f"|format(tx.quantity * tx.price_per_unit) }}</td>
+          <td class="text-end">{{ tx.quantity|czf(1) }}</td>
+          <td class="text-end">{{ tx.price_per_unit|czf(4) }}</td>
+          <td class="text-end fw-semibold">{{ (tx.quantity * tx.price_per_unit)|czf }}</td>
           <td>{{ tx.currency }}</td>
           <td class="text-muted small">{{ tx.notes }}</td>
           <td>

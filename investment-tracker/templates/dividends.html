@@ -12,7 +12,7 @@
       <div class="card">
         <div class="card-body">
           <div class="text-muted small">{{ year }}</div>
-          <div class="fs-5 fw-bold text-success">{{ "%.2f"|format(data.total) }}</div>
+          <div class="fs-5 fw-bold text-success">{{ data.total|czf }}</div>
           <div class="text-muted small">{{ data.rows|length }} payment{{ 's' if data.rows|length != 1 }}</div>
         </div>
       </div>
@@ -42,10 +42,10 @@
             <td>{{ row.date }}</td>
             <td class="fw-semibold">{{ row.ticker }}</td>
             <td class="text-muted small">{{ row.name }}</td>
-            <td class="text-end">{{ "%.4f"|format(row.quantity) }}</td>
-            <td class="text-end">{{ "%.4f"|format(row.price_per_unit) }}</td>
+            <td class="text-end">{{ row.quantity|czf(1) }}</td>
+            <td class="text-end">{{ row.price_per_unit|czf(4) }}</td>
             <td class="text-end fw-semibold text-success">
-              {{ "%.2f"|format(row.quantity * row.price_per_unit) }}
+              {{ (row.quantity * row.price_per_unit)|czf }}
             </td>
             <td>{{ row.currency }}</td>
             <td class="text-muted small">{{ row.notes }}</td>

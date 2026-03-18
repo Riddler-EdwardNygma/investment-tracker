@@ -118,6 +118,9 @@ def _get_cached(ticker: str) -> dict | None:
     conn.close()
     if not row:
         return None
+    # If both fields are empty the previous fetch failed (e.g. SSL issue) – retry
+    if not row["sector"] and not row["geography"]:
+        return None
     # Check TTL
     try:
         updated = datetime.fromisoformat(row["last_updated"])
