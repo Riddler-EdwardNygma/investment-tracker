@@ -28,6 +28,7 @@ from prices import get_price, refresh_prices
 from metadata import get_metadata, upsert_metadata
 import forex
 from xtb_import import parse_xtb_csv
+from dividends_fetch import fetch_market_dividends
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-change-in-production"
@@ -375,6 +376,80 @@ def dividends():
         by_year[year]["rows"].append(r)
 
     return render_template("dividends.html", by_year=by_year, all_rows=rows)
+
+
+# ── Auto-fetch dividends from Yahoo Finance ───────────────────────────────────
+
+@app.route("/dividends/fetch")
+def fetch_dividends_preview():
+    """Fetch dividend history from yfinance for all portfolio tickers
+    and show a preview of suggestions not yet recorded."""
+    lots = database.get_open_lots()
+    tickers = list({lot["ticker"] for lot in lots})
+
+    if not tickers:
+        flash("No open positions found. Add some BUY transactions first.", "warning")
+        return redirect(url_for("dividends"))
+
+    all_tx = database.get_all_transactions_as_dicts()
+    existing = [dict(d) for d in database.get_dividends()]
+
+    suggestions, errors = fetch_market_dividends(tickers, all_tx, existing)
+
+    if errors:
+        for ticker, msg in errors:
+            flash(f"{ticker}: could not fetch dividends – {msg}", "warning")
+
+    if not suggestions:
+        flash("No new dividends found from market data. "
+              "All known dividends are already recorded.", "info")
+        return redirect(url_for("dividends"))
+
+    session["dividend_suggestions"] = json.dumps(suggestions)
+
+    # Re-render dividends page with suggestions embedded
+    rows = database.get_dividends()
+    by_year = {}
+    for r in rows:
+        year = r["date"][:4]
+        total = r["quantity"] * r["price_per_unit"]
+        by_year.setdefault(year, {"total": 0.0, "rows": []})
+        by_year[year]["total"] += total
+        by_year[year]["rows"].append(r)
+
+    return render_template(
+        "dividends.html",
+        by_year=by_year,
+        all_rows=rows,
+        suggestions=suggestions,
+    )
+
+
+@app.route("/dividends/fetch/confirm", methods=["POST"])
+def confirm_dividends():
+    """Import selected auto-fetched dividends into the DB."""
+    selected = set(request.form.getlist("selected"))
+    suggestions = json.loads(session.pop("dividend_suggestions", "[]"))
+
+    imported = 0
+    for i, s in enumerate(suggestions):
+        if str(i) not in selected:
+            continue
+        database.add_transaction(
+            ticker=s["ticker"],
+            name=s["name"],
+            asset_type=s["asset_type"],
+            transaction_type="DIVIDEND",
+            quantity=s["shares_held"],
+            price_per_unit=s["amount_per_share"],
+            currency=s["currency"],
+            date=s["date"],
+            notes="Auto-fetched from Yahoo Finance",
+        )
+        imported += 1
+
+    flash(f"Imported {imported} dividend(s) successfully.", "success")
+    return redirect(url_for("dividends"))
 
 
 # ── API ───────────────────────────────────────────────────────────────────────

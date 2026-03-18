@@ -2,7 +2,66 @@
 {% block title %}Dividends – Investment Tracker{% endblock %}
 
 {% block content %}
-<h4 class="mb-3"><i class="bi bi-cash-coin me-2"></i>Dividend Income</h4>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0"><i class="bi bi-cash-coin me-2"></i>Dividend Income</h4>
+  <a href="{{ url_for('fetch_dividends_preview') }}"
+     class="btn btn-sm btn-outline-success"
+     id="fetchBtn"
+     onclick="this.innerHTML='<span class=\'spinner-border spinner-border-sm\'></span> Fetching…'; this.classList.add('disabled');">
+    <i class="bi bi-cloud-download me-1"></i>Fetch from Market
+  </a>
+</div>
+
+{% if suggestions %}
+<div class="card border-success mb-4">
+  <div class="card-header bg-success text-white fw-semibold">
+    <i class="bi bi-cloud-download me-1"></i>
+    {{ suggestions|length }} new dividend(s) found from Yahoo Finance – select which to import
+  </div>
+  <form method="POST" action="{{ url_for('confirm_dividends') }}">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width:36px">
+              <input type="checkbox" id="selectAll" class="form-check-input"
+                     onchange="document.querySelectorAll('.div-check').forEach(c=>c.checked=this.checked)">
+            </th>
+            <th>Date</th>
+            <th>Ticker</th>
+            <th class="text-end">Div/Share</th>
+            <th class="text-end">Shares held</th>
+            <th class="text-end">Total</th>
+            <th>Currency</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in suggestions %}
+          <tr>
+            <td><input type="checkbox" name="selected" value="{{ loop.index0 }}"
+                       class="form-check-input div-check" checked></td>
+            <td>{{ s.date }}</td>
+            <td class="fw-semibold">{{ s.ticker }}
+              {% if s.name %}<br><small class="text-muted">{{ s.name }}</small>{% endif %}
+            </td>
+            <td class="text-end">{{ s.amount_per_share|czf(4) }}</td>
+            <td class="text-end">{{ s.shares_held|czf(4) }}</td>
+            <td class="text-end fw-semibold text-success">{{ s.total|czf }}</td>
+            <td>{{ s.currency }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer d-flex gap-2">
+      <button type="submit" class="btn btn-success btn-sm">
+        <i class="bi bi-check-circle me-1"></i>Import Selected
+      </button>
+      <a href="{{ url_for('dividends') }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endif %}
 
 {% if by_year %}
   <!-- Annual totals -->

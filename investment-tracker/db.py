@@ -312,6 +312,16 @@ def get_realized_pnl_detail(year: int) -> list:
     return detail_rows
 
 
+def get_all_transactions_as_dicts() -> list:
+    """Return all transactions as plain dicts (for use in Python logic)."""
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM transactions ORDER BY date ASC, id ASC"
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
 def get_sell_years() -> list:
     """Return list of distinct years that have SELL transactions."""
     conn = get_db()
